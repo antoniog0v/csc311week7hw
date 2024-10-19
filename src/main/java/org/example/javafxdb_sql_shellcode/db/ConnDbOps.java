@@ -4,6 +4,10 @@
  */
 package org.example.javafxdb_sql_shellcode.db;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import org.example.javafxdb_sql_shellcode.Person;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -16,12 +20,12 @@ import java.sql.Statement;
  * @author MoaathAlrajab
  */
 public class ConnDbOps {
-    final String MYSQL_SERVER_URL = "jdbc:mysql://localhost/";
-    final String DB_URL = "jdbc:mysql://localhost/DBname";
-    final String USERNAME = "admin";
-    final String PASSWORD = "password";
-    
-    public  boolean connectToDatabase() {
+    final String MYSQL_SERVER_URL = "jdbc:mysql://villanicsc311server.mysql.database.azure.com/";
+    final String DB_URL = "jdbc:mysql://villanicsc311server.mysql.database.azure.com/DBname";
+    final String USERNAME = "villaniadmin";
+    final String PASSWORD = "farmingdale25!";
+
+    public boolean connectToDatabase() {
         boolean hasRegistredUsers = false;
 
 
@@ -68,6 +72,70 @@ public class ConnDbOps {
         return hasRegistredUsers;
     }
 
+//Getting users from database so that you can put them in the observable list
+
+    public ObservableList<Person> getUserFromDatabase() {
+        ObservableList<Person> personList = FXCollections.observableArrayList();
+
+        try {
+            Connection conn = DriverManager.getConnection(DB_URL, USERNAME, PASSWORD);
+            String sql = "SELECT name, email, phone, address, password FROM users";
+            Statement statement = conn.createStatement();
+            ResultSet resultSet = statement.executeQuery(sql);
+
+            //Iterate over the result set and create Person objects, which we can put into the list (all from database)
+            while (resultSet.next()) {
+                String fullName = resultSet.getString("name");
+                String emailAddress = resultSet.getString("email");
+                String phoneNumber = resultSet.getString("phone");
+                String houseAddress = resultSet.getString("address");
+                String password = resultSet.getString("password");
+
+                // Create a new Person object and add it to the list
+                Person person = new Person(fullName, emailAddress, phoneNumber, houseAddress, password);
+                personList.add(person);
+            }
+
+            resultSet.close();
+            statement.close();
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return personList;  // Return the list of users
+    }
+
+    //Method for deleting user from database
+
+    public void deleteUserFromDatabase(String emailAddress) {
+
+        try {
+            Connection conn = DriverManager.getConnection(DB_URL, USERNAME, PASSWORD);
+
+            //SQL delete query to remove the user with the given email (still based off selection tho)
+            String sql = "DELETE FROM users WHERE email = ?";
+            PreparedStatement preparedStatement = conn.prepareStatement(sql);
+
+            // Set the email to identify which user to delete
+            preparedStatement.setString(1, emailAddress);
+
+            //deletion
+            int row = preparedStatement.executeUpdate();
+
+            if (row > 0) {
+                System.out.println("User was deleted successfully from the database.");
+            } else {
+                System.out.println("No user found based on given email.");
+            }
+
+            preparedStatement.close();
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     public  void queryUserByName(String name) {
 
 
@@ -80,11 +148,10 @@ public class ConnDbOps {
             ResultSet resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
-                int id = resultSet.getInt("id");
                 String email = resultSet.getString("email");
                 String phone = resultSet.getString("phone");
                 String address = resultSet.getString("address");
-                System.out.println("ID: " + id + ", Name: " + name + ", Email: " + email + ", Phone: " + phone + ", Address: " + address);
+                System.out.println("Name: " + name + ", Email: " + email + ", Phone #: " + phone + ", Address: " + address);
             }
 
             preparedStatement.close();
@@ -93,6 +160,9 @@ public class ConnDbOps {
             e.printStackTrace();
         }
     }
+
+
+    //Lists all users
 
     public  void listAllUsers() {
 
@@ -121,6 +191,8 @@ public class ConnDbOps {
         }
     }
 
+    //Inserts new user
+
     public  void insertUser(String name, String email, String phone, String address, String password) {
 
 
@@ -147,5 +219,43 @@ public class ConnDbOps {
         }
     }
 
+    //Updating user so you can edit them freely. It's edited using the email as a primary key
+
+    public void updateUser(String name, String email, String phone, String address, String password, String firstEmail) {
+
+            try {
+                Connection conn = DriverManager.getConnection(DB_URL, USERNAME, PASSWORD);
+
+                //SQL update query to modify the user with the given email
+                String sql = "UPDATE users SET name = ?, email = ?, phone = ?, address = ?, password = ? WHERE email = ?";
+                PreparedStatement preparedStatement = conn.prepareStatement(sql);
+
+                //Set the values to update
+                preparedStatement.setString(1, name);
+                preparedStatement.setString(2, email);
+                preparedStatement.setString(3, phone);
+                preparedStatement.setString(4, address);
+                preparedStatement.setString(5, password);
+                preparedStatement.setString(6, firstEmail);
+
+
+                //Execute the update
+                int row = preparedStatement.executeUpdate();
+
+                if (row > 0) {
+                    System.out.println("User information was updated successfully.");
+                } else {
+                    System.out.println("No user found with the given email.");
+                }
+
+                preparedStatement.close();
+                conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
     
-}
+

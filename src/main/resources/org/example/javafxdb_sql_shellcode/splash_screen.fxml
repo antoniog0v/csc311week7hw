@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane prefHeight="560.0" prefWidth="850.0" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.javafxdb_sql_shellcode.SplashScreen">
+    <ImageView fitHeight="293.0" fitWidth="332.0" layoutX="295.0" layoutY="117.0" pickOnBounds="true" preserveRatio="true">
+        <image>
+            <Image url="@../../../../../../../JavaFxDB_SQL_ShellCode/src/main/resources/org/example/javafxdb_sql_shellcode/SUNY_Farmingdale.png" />
+        </image>
+    </ImageView>
+</AnchorPane>
+
+
+
